@@ -1,3 +1,5 @@
+#Habibullah Contribution
+
 from tkinter import *
 import processing
 import Priorqueue
@@ -276,6 +278,9 @@ class Microprocessor:
                              height=2, width=6, font="Arial 14 bold",
                              bg="#476b6a", fg="white")
         modtextLabel.place(x=254, y=80, anchor="nw")
+        
+        #Azaan's Contribution
+        
         def memory_block(self, memorylist, highlighter):
         root = self.root
 
