@@ -147,6 +147,245 @@ class Instruction:
             self.orF(opr1, opr2)
         return self.Obj
     
+    # Samama's Contribution Starts Here
+    
+    def mov(self, opr1, opr2):
+        des_index = ''
+        source_index = ''
+        source_indexh = ''
+        source_indexl = ''
+        des_indexh = ''
+        des_indexl= ''
+
+        # Case'1' : MOV REG REG
+
+        if(opr1 in self.XRegsList and opr2 in self.XRegsList):
+            sourcelist = self.Obj.XRegs(opr2)
+
+            sourceDatah = self.PrevObj.regList[sourcelist[2]]
+            sourceDatal = self.PrevObj.regList[sourcelist[3]]
+            
+            deslist = self.Obj.XRegs(opr1)
+
+            self.Obj.regList[deslist[2]] = sourceDatah
+            self.Obj.regList[deslist[3]] = sourceDatal
+            self.Obj.opcode = '1000101111'
+            self.Obj.highlighter = [sourcelist[2],deslist[2],'x','x',sourcelist[3],deslist[3]]
+
+        elif (opr1 in self.RegList and opr2 in self.RegList):
+            source_index = self.RegList.index(opr2)
+            des_index = self.RegList.index(opr1)
+            
+            sourceData = self.PrevObj.regList[source_index]
+
+            if(source_index<=7 and des_index>7):
+                sourceData = self.Obj.DectoHex(sourceData,1)
+
+            self.Obj.regList[des_index] = sourceData
+            self.Obj.opcode = '1000101011'
+            self.Obj.highlighter = [source_index,des_index,'x','x','x','x']
+            
+
+        elif (opr1 not in self.RegList and opr2 not in self.RegList and opr1 not in self.XRegsList and opr2 not in self.XRegsList):
+            return "Error 400 : Invalid X Operands"
+
+        elif ((opr1 in self.RegList and opr2 in self.XRegsList) or (opr2 in self.RegList and opr1 in self.XRegsList)):
+            return "Operands size doesn't match"
+
+        elif(opr1 in self.RegList or opr2 in self.RegList):
+            s = ''
+                              
+            if(opr1 in self.RegList and opr2[0] == '['):
+                des_index = self.RegList.index(opr1)                  
+                s = self.Obj.swork(opr2)
+                if(s == "Syntax Error"):
+                    return s
+        
+        # Case 2: Mov Reg [Mem]
+                #check s == hex
+                if(s in self.MemList):
+                    memLoc = s
+                    
+            # Case 3: MOV Reg [Reg]
+
+                elif(s in self.RegList):
+                    idx = self.RegList.index(s)
+                    memLoc = self.PrevObj.regList[int(idx)] 
+                    memLoc = '000'+memLoc
+                
+                elif(s in self.XRegsList):
+                    temp = self.Obj.XRegs(s)
+                    memLoc = self.PrevObj.regList[temp[3]]
+                    des_index = temp[3]
+                    memLoc = '000'+memLoc
+
+                elif(s not in self.RegList and s not in self.MemList and s not in self.XRegsList):
+                    return "401: Invalid Memory Location"
+
+                if(memLoc not in self.MemList):
+                    return "401: Invalid Memory Location"
+                else:
+                    source_index = self.MemList.index(memLoc)
+                    sourceData = self.PrevObj.memorylist[source_index]
+                    self.Obj.regList[des_index] = sourceData
+                    self.Obj.opcode = '1000101000'
+                    self.Obj.highlighter = ['x',des_index,source_index,'x','x','x']
+            
+            elif(opr2 in self.RegList and opr1[0] == '['):
+                source_index = self.RegList.index(opr2)
+                s = opr1
+                if(s[0] != '[' or s[-1] != ']'):
+                    return "Syntax Error"
+                s = s.replace('[','')
+                s = s.replace(']','')
+
+                #check hex here 
+        
+        #Case 4: MOV [Mem] Reg
+        
+                if(s in self.MemList):
+                    memLoc = s
+                  
+        #Case 5: MOV [Reg] Reg
+
+                elif(s in self.RegList):
+                    idx = self.RegList.index(s)
+                    memLoc = self.PrevObj.regList[int(idx)] 
+                  
+
+                elif(s in self.XRegsList):
+                    temp = self.Obj.XRegs(s)
+                    memLoc = self.PrevObj.regList[temp[3]]
+                    memLoc = '000'+memLoc
+                
+
+                elif(s not in self.RegList and s not in self.MemList and s not in self.XRegsList):
+                    return "401: Invalid Memory Location"
+
+                if(memLoc not in self.MemList):
+                    return "401 : Invalid Memory Location"
+                else:
+                    des_index = self.MemList.index(memLoc)
+
+                sourceData = self.PrevObj.regList[source_index]
+                self.Obj.memorylist[des_index] = sourceData
+                self.Obj.opcode = '1000100000'
+                self.Obj.highlighter = [source_index,'x','x',des_index,'x','x']
+    
+    
+
+        elif(opr1 in self.XRegsList or opr2 in self.XRegsList):           
+            if(opr1 in self.XRegsList and opr2[0] == '['):
+                deslist = self.Obj.XRegs(opr1)
+                des_indexh = deslist[2]
+                des_indexl = deslist[3] 
+
+                s = self.Obj.swork(opr2)
+                if(s == "Syntax Error"):
+                    return s
+        
+        # Case 2: Mov Reg [Mem]
+                #check s == hex
+                if(s in self.MemList):
+                    memLoc = s
+
+        # Case 3: MOV Reg [Reg]
+
+                elif(s in self.RegList):
+                    idx = self.RegList.index(s)
+                    memLoc = self.PrevObj.regList[int(idx)] 
+                    memLoc = '000'+memLoc
+
+                elif (s in self.XRegsList):
+                    temp = self.Obj.XRegs(s)
+                    memLoc = self.PrevObj.regList[temp[3]]
+                    memLoc = '000'+memLoc
+
+                elif(s not in self.RegList and s not in self.MemList and s not in self.XRegsList):
+                    return "401: Invalid Memory Location"
+
+                if(memLoc not in self.MemList):
+                    return "401: Invalid Memory Location"
+                else:
+                    
+                    source_index = self.MemList.index(memLoc)
+                    sourceDatah = self.PrevObj.memorylist[source_index]
+                    if(source_index==15):
+                        sourceDatal = '00' 
+                    else:
+                        sourceDatal = self.PrevObj.memorylist[source_index+1]
+                    self.Obj.regList[des_indexl] = sourceDatal
+                    self.Obj.regList[des_indexh] = sourceDatah
+                    self.Obj.opcode = '1000101100'
+                    self.Obj.highlighter = [des_indexl,des_indexh,source_index,source_index+1,'x','x']
+
+
+            elif(opr2 in self.XRegsList and opr1[0] == '['):
+                temp = self.Obj.XRegs(opr2)
+                source_indexh = temp[2]
+                source_indexl = temp[3]
+                s = opr1
+                if(s[0] != '[' or s[-1] != ']'):
+                    return "Syntax Error"
+                s = s.replace('[','')
+                s = s.replace(']','')
+
+                #check hex here 
+        
+        #Case 4: MOV [Mem] Reg
+        
+                if(s in self.MemList):
+                    memLoc = s
+                
+        #Case 5: MOV [Reg] Reg
+
+                elif(s in self.RegList):
+                    idx = self.RegList.index(s)
+                    memLoc = self.PrevObj.regList[int(idx)] 
+
+                elif(s in self.XRegsList):
+                    temp = self.Obj.XRegs(s)
+                    memLoc = self.PrevObj.regList[temp[3]]
+                    memLoc = '000'+memLoc
+
+                elif(s not in self.RegList and s not in self.MemList and s not in self.XRegsList):
+                    return "401: Invalid Memory Location"
+
+                if(memLoc not in self.MemList):
+                    return "401 : Invalid Memory Location"
+                else:
+                    des_index = self.MemList.index(memLoc)
+
+                sourceDatah = self.PrevObj.regList[source_indexh]
+                sourceDatal = self.PrevObj.regList[source_indexl]
+
+                    
+                self.Obj.memorylist[des_index] = sourceDatah
+                self.Obj.memorylist[des_index+1] = sourceDatal
+                self.Obj.opcode = '1000100100'
+                self.Obj.highlighter = [source_indexh,source_indexl,des_index,des_index+1,'x','x']
+
+            
+        #Case 6 : Mov Reg Imm
+
+        if((opr1 in self.RegList or opr1 in self.XRegsList) and (opr2 not in self.RegList and opr2 not in self.XRegsList and opr2[0] != '[')):
+            if(opr1 in self.XRegsList):
+                temp = self.Obj.XRegs(opr1)
+                des_indexh = temp[2]
+                des_indexl = temp[3]
+                
+                self.Obj.regList[des_indexh] = opr2[0]+opr2[1]
+                self.Obj.regList[des_indexl] = opr2[2]+opr2[3]
+                self.Obj.highlighter = [des_indexh,des_indexl,'x','x','x','x']                
+                self.Obj.opcode = '1100011100'
+            
+            if(opr1 in self.RegList):
+                source_index = self.RegList.index(opr1)
+                
+                self.Obj.opcode = '1100011000'
+                self.Obj.regList[source_index] = opr2
+                self.Obj.highlighter = [source_index,'x','x','x','x','x']
+    
     # Mujtaba's Contribution starts here
     
     #Case 7: INC [Reg]
