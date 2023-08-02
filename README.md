@@ -37,4 +37,9 @@ The 8086/8088 Microprocessor Simulator GUI is a coding project that provides a g
 ## Contributing
 Contributions are welcome! If you'd like to enhance the simulator's functionality or fix any issues,
 feel free to submit a pull request. Please follow the existing code style and provide clear commit messages.
-   
+
+## ScreenShot
+
+<img width="923" alt="image" src="https://github.com/mujipro1/8086-8088-Simulator/assets/116620251/ddf10984-ad9f-482e-9dbd-b885a930a2df">
+
+
