@@ -21,13 +21,13 @@ The 8086/8088 Microprocessor Simulator GUI is a coding project that provides a g
 2. Navigate to the project directory:
 
   ```sh
-  cd 8086-microprocessor-simulator
+     cd 8086-microprocessor-simulator
   ```
 3. Install the required dependencies. This project relies on the tkinter library for the GUI.
    If you're using a virtual environment, make sure it's activated before installing the dependencies:
-
-   _pip install tkinter_
-
+   ```sh
+      _pip install tkinter_
+   ```
 ## Usage
 
 1. Run the `main.py` script
